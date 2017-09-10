@@ -1,52 +1,66 @@
 
 import requests
 import urllib3
+import logging
 from lxml import etree
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse,parse_qs,urlencode
+from urllib.parse import urlparse, parse_qs, urlencode
 
 # urllib3.disable_warnings()
 # TODO: OOP & complie
 
-headers = urllib3.make_headers(keep_alive=True,accept_encoding='gzip, deflate, br',user_agent="Mozilla/5.0 \
- (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36")
-# headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0'}
-'''
-CAS login
-'''
-# id = input("Your ID:")
-# passwd = input("Password:")
-host1 = 'https://cas.sustc.edu.cn'
-host2 = 'http://jwxt.sustc.edu.cn'
-uid = "11510493"
-passwd = "***REMOVED***"
-s = requests.Session()
-s.headers.update(headers)
-# http = urllib3.PoolManager(headers = headers,cert_reqs='CERT_REQUIRED',ca_certs=certifi.where())
-s.get('http://jwxt.sustc.edu.cn/jsxsd/')
-# r = http.request('GET',)
-r = s.get('https://cas.sustc.edu.cn/cas/login?service=http%3A%2F%2Fjwxt.sustc.edu.cn%2Fjsxsd%2F')
-soup = BeautifulSoup(r.text,"html.parser")
-btn_row = soup.find_all("section",{"class":"row btn-row"})[0]
-fields = {'username':uid,"password":passwd}
-for input_ in btn_row.find_all("input"):
-    fields[input_['name']] = input_['value']
+class CASSession(object):
+    '''
+    CAS login
+    '''
+    def __init__(self):
+        # headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0'}
+        headers = urllib3.make_headers(keep_alive=True,accept_encoding='gzip, deflate, br',user_agent="Mozilla/5.0 \
+        (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36")
+        self.host = 'https://cas.sustc.edu.cn'
+        self.session = requests.Session()
+        self.session.headers.update(headers)
+        self.uid = None
+        self.passwd = None
+    
+    def loginService(self, serviceURL):
+        params = urlencode({"service": serviceURL})
+        url = 'https://cas.sustc.edu.cn/cas/login?%s' % params
+        logging.debug(url)
+        r = self.session.get(url)
+        # if not login CAS
+        self.__loginCAS(r.text)
 
-actionURL = host1 + soup.find_all("form",{'id':'fm1'})[0]['action']
-# print(actionURL)
-# print(fields)
-r = s.post(url=actionURL, data=fields)
-# r = s.post(actionURL,fields=fields)
-# Successful Login
-#print(r.text)
 
-# r = s.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xklc_list")
-# first row head | the rest content
-# time page.xpath("/html/body//table[@id='tbKxkc']/tr[2]/td[3]/text()[1]")[0]
-# url page.xpath("/html/body//table[@id='tbKxkc']/tr[2]/td[4]/a/@href[1]")[0]
+    def setAuthInfo(self, uid, passwd):
+        self.uid = uid
+        self.passwd = passwd
 
-def getxklist():
-    r = s.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xklc_list")
+    def __loginCAS(self,pagetext):
+        page = etree.HTML(pagetext)
+        inputs = page.xpath("/html//form[@id='fm1']//input")
+        fields = {'username':self.uid,"password":self.passwd}
+        for input_ in inputs:
+            name = input_.xpath("@name")[0]
+            value = input_.xpath("@value")[0]
+            if value != '':
+                fields[name] = value
+        logging.debug(fields)
+        actionURL = self.host + page.xpath("/html//form[@id='fm1']/@action")[0]
+        logging.debug(actionURL)
+        r = self.session.post(url=actionURL, data=fields)
+        logging.debug(r)
+
+    def getSession(self):
+        return self.session
+def getxklist(session):
+    '''
+    # r = s.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xklc_list")
+    # first row head | the rest content
+    # time page.xpath("/html/body//table[@id='tbKxkc']/tr[2]/td[3]/text()[1]")[0]
+    # url page.xpath("/html/body//table[@id='tbKxkc']/tr[2]/td[4]/a/@href[1]")[0]
+    '''
+    r = session.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xklc_list")
     page = etree.HTML(r.text)
     # get the list
     row_count = len(page.xpath("/html/body//table[@id='tbKxkc']/tr"))
@@ -61,7 +75,22 @@ def getxklist():
             xklist.append((item_time,query['jx0502zbid'][0]))
     return xklist
 
-xklist = getxklist()
-r = s.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xsxk_index?jx0502zbid="+xklist[0][1])
-r = s.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxkkc/fawxkOper?jx0404id=201720181000695&xkzy=&trjf=")
-print(r.text)
+def main():
+    logging.basicConfig(level=logging.DEBUG)
+    uid = "11510493"
+    passwd = "***REMOVED***"
+    c = CASSession()
+    c.setAuthInfo(uid,passwd)
+    c.loginService("http://jwxt.sustc.edu.cn/jsxsd/")
+    s = c.getSession()
+    xklist = getxklist(s)
+    r = s.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xsxk_index?jx0502zbid="+xklist[0][1])
+    r = s.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxkkc/fawxkOper?jx0404id=201720181000695&xkzy=&trjf=")
+    print(r.text)
+
+if __name__== "__main__":
+    main()
+
+
+
+
