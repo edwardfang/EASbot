@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse,parse_qs,urlencode
 
 # urllib3.disable_warnings()
+# TODO: OOP & complie
 
 headers = urllib3.make_headers(keep_alive=True,accept_encoding='gzip, deflate, br',user_agent="Mozilla/5.0 \
  (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36")
