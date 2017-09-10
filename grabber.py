@@ -65,7 +65,7 @@ class Grabber(object):
                 self.session.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xsxk_index?jx0502zbid="+self.xklist[0][1])
                 r = self.session.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxkkc/%sOper?jx0404id=%s&xkzy=&trjf=" % (Grabber.operator[course[1]],course[0]))
                 result = json.loads(r.text)
-                logging.info("course %s %s, message %s" % (course[0], result['success'], result['message']))
+                logging.info("course: %s, response: %s, message: %s" % (course[0], result['success'], result['message']))
             time.sleep(self.delay/1000)
         #test = ('201720181000695',0)
         
