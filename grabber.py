@@ -62,6 +62,7 @@ class Grabber(object):
             return
         while(True):
             for course in self.courselist:
+                ## Important here! self.xklist[0][1]
                 self.session.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xsxk_index?jx0502zbid="+self.xklist[0][1])
                 r = self.session.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxkkc/%sOper?jx0404id=%s&xkzy=&trjf=" % (Grabber.operator[course[1]],course[0]))
                 result = json.loads(r.text)
