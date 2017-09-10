@@ -1,13 +1,9 @@
 
-import requests
-import urllib3
+from urllib.parse import urlparse, parse_qs, urlencode
 import logging
 from lxml import etree
-from bs4 import BeautifulSoup
-from urllib.parse import urlparse, parse_qs, urlencode
-
-# urllib3.disable_warnings()
-# TODO: OOP & complie
+import requests
+import urllib3
 
 class CASSession(object):
     '''
