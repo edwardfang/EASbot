@@ -40,6 +40,22 @@ class Grabber(object):
         coursetype: 0-fawxk, 1-ggxxkxk, 2-knjxk, 3-bxqjhxk
         '''
         self.courselist.append((courseNo,courseType))
+    def saveConfig(self,filename = 'grabber-conf.json'):
+        from collections import OrderedDict
+        configstr = OrderedDict(delay=self.delay, uid=self.uid, password=self.passwd, courseList=self.courselist)
+        with open(filename,'w') as file:
+            file.write(json.dumps(configstr))
+
+    def loadConfig(self, filename = 'grabber-conf.json'):
+        text = None
+        with open(filename,'r') as file:
+            text = file.read()
+        config = json.loads(text)
+        self.uid = config['uid']
+        self.passwd = config['password']
+        self.courselist = config['courseList']
+        self.delay = int(config['delay'])
+        logging.info(config)
 
     def start(self):
         if len(self.courselist) < 1:
@@ -79,29 +95,34 @@ class Grabber(object):
 
 def main():
     logging.basicConfig(level=logging.INFO)
-    uid = "11510493"
-    passwd = "***REMOVED***"
     g = Grabber()
-    g.setloginInfo(uid,passwd)
+    isloadconfig = input("Load the config file? y or n [y]:")
+    if isloadconfig == 'y' or isloadconfig =='':
+        g.loadConfig()
+    else:
+        uid = "11510493"
+        passwd = "***REMOVED***"
+        g.setloginInfo(uid,passwd)
+        total = input("Please input the total number of courses you want to grab:")
+        if total == '':
+            total = 0
+        try:
+            total = int(total)
+        except ValueError:
+            print("That's not an int!")
+        for i in range(int(total)):
+            courseCode = input("Course code:")
+            courseType = input("0-fawxk, 1-ggxxkxk, 2-knjxk, 3-bxqjhxk c-cancel \nCourse Type (default 0):")
+            if courseCode == '' or courseType == 'c':
+                continue
+            if courseType == '':
+                courseType = 0
+            g.addcourse(courseCode,int(courseType))
+        print(g.getCourseList())
+        input("Please Check, Press enter to continue")
+        input("Press enter to start")
+        g.saveConfig()
     g.init()
-    total = input("Please input the total number of courses you want to grab:")
-    if total == '':
-        total = 0
-    try:
-        total = int(total)
-    except ValueError:
-        print("That's not an int!")
-    for i in range(int(total)):
-        courseCode = input("Course code:")
-        courseType = input("0-fawxk, 1-ggxxkxk, 2-knjxk, 3-bxqjhxk c-cancel \nCourse Type (default 0):")
-        if courseCode == '' or courseType == 'c':
-            continue
-        if courseType == '':
-            courseType = 0
-        g.addcourse(courseCode,int(courseType))
-    print(g.getCourseList())
-    input("Please Check, Press enter to continue")
-    input("Press enter to start")
     g.start()
 
 
