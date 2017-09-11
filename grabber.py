@@ -68,10 +68,14 @@ class Grabber(object):
             else:
                 for course in self.courselist:
                     ## Important here! self.xklist[0][1]
+                    ## http://jwxt.sustc.edu.cn/jsxsd/xsxk/xsxk_index?jx0502zbid=2A018810EA3C4DCFAD5A971752AD1A0D
                     self.session.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xsxk_index?jx0502zbid="+self.xklist[0][1])
                     r = self.session.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxkkc/%sOper?jx0404id=%s&xkzy=&trjf=" % (Grabber.operator[course[1]],course[0]))
                     result = json.loads(r.text)
-                    logging.info("course: %s, response: %s, message: %s" % (course[0], result['success'], result['message']))
+                    if 'success' in result.keys():
+                        logging.info("course: %s, response: %s, message: %s" % (course[0], result['success'], result['message']))
+                    else:
+                        logging.info("no such course")
             time.sleep(self.delay/1000)
         #test = ('201720181000695',0)
         
