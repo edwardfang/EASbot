@@ -15,6 +15,7 @@ class Grabber(object):
         self.courselist = list()
         self.delay = 100
         self.threadCount = 1
+        self.xklist = list()
 
     def getCourseList(self):
         showlist = [(courseNo, Grabber.operator[courseType]) for (courseNo, courseType) in self.courselist]
@@ -29,7 +30,7 @@ class Grabber(object):
         c.setAuthInfo(self.uid,self.passwd)
         c.loginService("http://jwxt.sustc.edu.cn/jsxsd/")
         self.session = c.getSession()
-        self.xklist = self.__getxklist(self.session)
+        
 
     def setloginInfo(self, username, password):
         self.uid = username
@@ -61,12 +62,16 @@ class Grabber(object):
         if len(self.courselist) < 1:
             return
         while(True):
-            for course in self.courselist:
-                ## Important here! self.xklist[0][1]
-                self.session.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xsxk_index?jx0502zbid="+self.xklist[0][1])
-                r = self.session.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxkkc/%sOper?jx0404id=%s&xkzy=&trjf=" % (Grabber.operator[course[1]],course[0]))
-                result = json.loads(r.text)
-                logging.info("course: %s, response: %s, message: %s" % (course[0], result['success'], result['message']))
+            if len(self.xklist) < 1:
+                self.xklist = self.__getxklist(self.session)
+                logging.info("waiting for the entrance")
+            else:
+                for course in self.courselist:
+                    ## Important here! self.xklist[0][1]
+                    self.session.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xsxk_index?jx0502zbid="+self.xklist[0][1])
+                    r = self.session.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxkkc/%sOper?jx0404id=%s&xkzy=&trjf=" % (Grabber.operator[course[1]],course[0]))
+                    result = json.loads(r.text)
+                    logging.info("course: %s, response: %s, message: %s" % (course[0], result['success'], result['message']))
             time.sleep(self.delay/1000)
         #test = ('201720181000695',0)
         
@@ -83,8 +88,9 @@ class Grabber(object):
         page = etree.HTML(r.text)
         # get the list
         row_count = len(page.xpath("/html/body//table[@id='tbKxkc']/tr"))
+        row_exist = len(page.xpath("/html/body//table[@id='tbKxkc']/tr[2]/td"))
         xklist = list()
-        if row_count>1:
+        if row_exist>1:
             for row in range(row_count-1):
                 item_time = page.xpath("/html/body//table[@id='tbKxkc']/tr[%d]/td[3]/text()[1]" % (row+2))[0]
                 item_url = page.xpath("/html/body//table[@id='tbKxkc']/tr[%d]/td[4]/a/@href[1]" % (row+2))[0]
