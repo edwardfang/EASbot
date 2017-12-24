@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from cas import CASSession
 from urllib.parse import urlparse, parse_qs, urlencode
 from lxml import etree
