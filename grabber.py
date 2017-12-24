@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-from cas import CASSession
-from urllib.parse import urlparse, parse_qs, urlencode
-from lxml import etree
+'''
+script for getting course in SUSTech
+'''
 import logging
 import time
 import json
+from urllib.parse import urlparse, parse_qs
+from lxml import etree
+from cas import CASSession
+
 
 
 class Grabber(object):
