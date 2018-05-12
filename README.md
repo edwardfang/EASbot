@@ -3,6 +3,8 @@ Education Administration System Robot for SUStech
 
 ## How to use
 
+First take a look at `grabber-conf.json.example`, then write one as your own and save it as `grabber-conf.json`.
+
 coursetype: 
 
 ```

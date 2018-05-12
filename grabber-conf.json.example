@@ -1,0 +1,15 @@
+{
+    "delay": 500,
+    "courseList": [
+        [
+            "201720183000003",
+            0
+        ],
+        [
+            "201720182001311",
+            4
+        ]
+    ],
+    "uid": "studentId",
+    "password": "password"
+}
