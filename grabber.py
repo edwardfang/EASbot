@@ -111,8 +111,7 @@ class Grabber(object):
                 item_url = page.xpath(
                     "/html/body//table[@id='tbKxkc']/tr[%d]/td[4]/a/@href[1]" % (row + 2))[0]
                 logging.debug(item_url)
-                parsed = urlparse(
-                    "/jsxsd/xsxk/xklc_view?jx0502zbid=334A7F7E4AB340C7913B2AB0A8FBE871")
+                parsed = urlparse(item_url)
                 query = parse_qs(qs=parsed.query)
                 print(item_time, query['jx0502zbid'][0])
                 xklist.append((item_time, query['jx0502zbid'][0]))

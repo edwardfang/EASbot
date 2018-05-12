@@ -55,7 +55,7 @@ class CASSession(object):
         logging.debug(fields)
         postURL = self.url
         # actionURL = self.host + page.xpath("/html//form[@id='fm1']/@action")[0]
-        logging.debug(postURL)
+        # logging.debug(postURL)
         r = self.session.post(url=postURL, data=fields)
         logging.debug(r)
 
@@ -77,16 +77,13 @@ def getxklist(session):
     xklist = list()
     if row_count > 1:
         for row in range(row_count - 1):
+            # get course selection Id
             item_time = page.xpath(
                 "/html/body//table[@id='tbKxkc']/tr[%d]/td[3]/text()[1]" % (row + 2))[0]
             item_url = page.xpath(
                 "/html/body//table[@id='tbKxkc']/tr[%d]/td[4]/a/@href[1]" % (row + 2))[0]
-            # parsed = urlparse(
-            #     "/jsxsd/xsxk/xklc_view?jx0502zbid=2A018810EA3C4DCFAD5A971752AD1A0D")
-            parsed = urlparse(
-                "/jsxsd/xsxk/xklc_view?jx0502zbid=334A7F7E4AB340C7913B2AB0A8FBE871")
+            parsed = urlparse(item_url)
             query = parse_qs(qs=parsed.query)
-            print(item_time, query['jx0502zbid'][0])
             xklist.append((item_time, query['jx0502zbid'][0]))
     return xklist
 
@@ -101,10 +98,12 @@ def main():
     s = c.getSession()
     xklist = getxklist(s)
     logging.debug(xklist)
-    r = s.get(
+    s.get(
         url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xsxk_index?jx0502zbid=" + xklist[0][1])
+    # s.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xsxk_tzsm")
+    # s.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxkjg/xsxkkb")
     r = s.get(
-        url="http://jwxt.sustc.edu.cn/jsxsd/xsxkkc/fawxkOper?jx0404id=201720182001072&xkzy=&trjf=")
+        url="http://jwxt.sustc.edu.cn/jsxsd/xsxkkc/fawxkOper?jx0404id=201720183000003&xkzy=&trjf=")
     print(r.text)
 
 
