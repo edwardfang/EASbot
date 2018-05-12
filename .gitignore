@@ -3,3 +3,4 @@ __pycache__
 .vscode
 bfg.jar
 .pytest_cache/
+grabber-conf.json
