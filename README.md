@@ -15,3 +15,9 @@ coursetype:
 4-bxxk Required courses
 5-xxxk Elective coursess
 ```
+
+run
+
+```shell
+./eas_bot/grabber.py
+```
