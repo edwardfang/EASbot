@@ -76,19 +76,25 @@ class Grabber(object):
             else:
                 for course in self.courselist:
                     # Important here! self.xklist[0][1]
-                    # http://jwxt.sustc.edu.cn/jsxsd/xsxk/xsxk_index?jx0502zbid=2A018810EA3C4DCFAD5A971752AD1A0D
+                    # init server side session
                     self.session.get(
                         url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xsxk_index?jx0502zbid=" + self.xklist[0][1])
                     r = self.session.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxkkc/%sOper?jx0404id=%s&xkzy=&trjf=" % (
                         Grabber.operator[course[1]], course[0]))
                     result = json.loads(r.text)
                     if 'success' in result.keys() and 'message' in result.keys():
-                        logging.info("course: %s, response: %s, message: %s" % (
+                        logging.info("courseId: %s, response: %s, message: %s" % (
                             course[0], result['success'], result['message']))
-                        # 当前教学班已选择 success
+                        if '已选择' in result['message']:
+                            # 当前教学班已选择 success
+                            self.courselist.remove(course)
                     else:
                         logging.info("no such course")
             time.sleep(self.delay / 1000)
+            print(self.courselist)
+            if len(self.courselist) < 1:
+                logging.info("Program finished. Exiting....")
+                return
         #test = ('201720181000695',0)
 
     def __getxklist(self, session):
@@ -113,7 +119,7 @@ class Grabber(object):
                 logging.debug(item_url)
                 parsed = urlparse(item_url)
                 query = parse_qs(qs=parsed.query)
-                print(item_time, query['jx0502zbid'][0])
+                logging.info('Open time: {0}, ID: {1}'.format(item_time, query['jx0502zbid'][0]))
                 xklist.append((item_time, query['jx0502zbid'][0]))
         return xklist
 
