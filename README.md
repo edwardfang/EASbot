@@ -19,5 +19,5 @@ coursetype:
 run
 
 ```shell
-./eas_bot/grabber.py
+./main.py
 ```
