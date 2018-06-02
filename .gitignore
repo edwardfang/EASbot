@@ -1,6 +1,7 @@
 __pycache__
 **__pycache__/*
 .vscode
+*.log
 bfg.jar
 .pytest_cache/
 grabber-conf.json

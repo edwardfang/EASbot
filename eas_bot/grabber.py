@@ -7,12 +7,12 @@ import time
 import json
 from urllib.parse import urlparse, parse_qs
 from lxml import etree
-from cas import CASSession
-
+from .cas import CASSession
 
 
 class Grabber(object):
-    operator = {0: 'fawxk', 1: 'ggxxkxk', 2: 'knjxk', 3: 'bxqjhxk', 4:'bxxk', 5:'xxxk'}
+    operator = {0: 'fawxk', 1: 'ggxxkxk', 2: 'knjxk',
+                3: 'bxqjhxk', 4: 'bxxk', 5: 'xxxk'}
 
     def __init__(self):
         self.session = None
@@ -82,20 +82,21 @@ class Grabber(object):
                     r = self.session.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxkkc/%sOper?jx0404id=%s&xkzy=&trjf=" % (
                         Grabber.operator[course[1]], course[0]))
                     result = json.loads(r.text)
+                    logging.info("courseId: {0}, response: {1}".format(
+                        course[0], r.text.strip()))
                     if 'success' in result.keys() and 'message' in result.keys():
-                        logging.info("courseId: %s, response: %s, message: %s" % (
-                            course[0], result['success'], result['message']))
-                        if '已选择' in result['message']:
+                        if result['message'] == None:
+                            logging.info("no such course")
+                        elif '已选择' in result['message']:
                             # 当前教学班已选择 success
                             self.courselist.remove(course)
                     else:
                         logging.info("no such course")
             time.sleep(self.delay / 1000)
-            print(self.courselist)
+            logging.info("Remaining Course: {0}".format(self.courselist))
             if len(self.courselist) < 1:
                 logging.info("Program finished. Exiting....")
                 return
-        #test = ('201720181000695',0)
 
     def __getxklist(self, session):
         '''
@@ -119,13 +120,20 @@ class Grabber(object):
                 logging.debug(item_url)
                 parsed = urlparse(item_url)
                 query = parse_qs(qs=parsed.query)
-                logging.info('Open time: {0}, ID: {1}'.format(item_time, query['jx0502zbid'][0]))
+                logging.info('Open time: {0}, ID: {1}'.format(
+                    item_time, query['jx0502zbid'][0]))
                 xklist.append((item_time, query['jx0502zbid'][0]))
         return xklist
 
 
 def main():
+    # logging
     logging.basicConfig(level=logging.INFO)
+    log_formatter = logging.Formatter("%(asctime)s[%(levelname)s]%(message)s")
+    file_handler = logging.FileHandler("grabber.log")
+    file_handler.setFormatter(log_formatter)
+    logging.getLogger().addHandler(file_handler)
+
     g = Grabber()
     isloadconfig = input("Load the config file? y or n [y]:")
     if isloadconfig == 'y' or isloadconfig == '':
