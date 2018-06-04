@@ -21,3 +21,9 @@ run
 ```shell
 ./main.py
 ```
+
+## TODO
+
+- timesync between client and server
+- login validation for grabber
+
