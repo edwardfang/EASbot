@@ -81,9 +81,13 @@ class Grabber(object):
                         url="http://jwxt.sustc.edu.cn/jsxsd/xsxk/xsxk_index?jx0502zbid=" + self.xklist[0][1])
                     r = self.session.get(url="http://jwxt.sustc.edu.cn/jsxsd/xsxkkc/%sOper?jx0404id=%s&xkzy=&trjf=" % (
                         Grabber.operator[course[1]], course[0]))
-                    result = json.loads(r.text)
                     logging.info("courseId: {0}, response: {1}".format(
                         course[0], r.text.strip()))
+                    try:
+                        result = json.loads(r.text)
+                    except:
+                        logging.info("anti-grabbing detected.")
+                        continue
                     if 'success' in result.keys() and 'message' in result.keys():
                         if result['message'] == None:
                             logging.info("no such course")

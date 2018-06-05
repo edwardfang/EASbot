@@ -24,6 +24,6 @@ run
 
 ## TODO
 
-- timesync between client and server
+- Time sync between client and server
 - login validation for grabber
 
